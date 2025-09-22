@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenCart Logistics - Delivery Simulation Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --secondary-dark: #2980b9;
+            --accent: #e74c3c;
+            --accent-dark: #c0392b;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #7f8c8d;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        nav a:hover,
+        nav a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 25px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .user-info h3 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .stats {
+            margin: 25px 0;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .stat-item p {
+            color: var(--gray);
+        }
+
+        .stat-item span {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .kpi-card:nth-child(2) {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+        }
+
+        .kpi-card:nth-child(3) {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        .kpi-card:nth-child(4) {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-top: 15px;
+        }
+
+        .simulation-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-2px);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: var(--primary);
+        }
+
+        .status-inactive {
+            background: var(--accent);
+        }
+
+        .driver-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .driver-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .driver-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .driver-info h4 {
+            margin-bottom: 5px;
+        }
+
+        .driver-info p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .animated-counter {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .order-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .order-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-info h4 {
+            margin-bottom: 5px;
+        }
+
+        .order-info p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .order-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .simulation-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h1 class="logo-text">GreenCart Logistics</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-play-circle"></i> Simulation</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Drivers</a></li>
+                    <li><a href="#"><i class="fas fa-box"></i> Orders</a></li>
+                    <li><a href="#"><i class="fas fa-route"></i> Routes</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>Alex Morgan</h3>
+                        <p>Logistics Manager</p>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <h3>Quick Stats</h3>
+                    <div class="stat-item">
+                        <p>Active Deliveries</p>
+                        <span>24</span>
+                    </div>
+                    <div class="stat-item">
+                        <p>Available Drivers</p>
+                        <span>12</span>
+                    </div>
+                    <div class="stat-item">
+                        <p>On-time Rate</p>
+                        <span>92%</span>
+                    </div>
+                    <div class="stat-item">
+                        <p>Fuel Efficiency</p>
+                        <span>8.2 mpg</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-plus"></i> New Simulation
+                </button>
+            </div>
+
+            <div class="dashboard">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div class="card-header">
+                        <h2 class="card-title">Key Performance Indicators</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <p class="kpi-title">TOTAL PROFIT</p>
+                            <div class="animated-counter" id="profit-counter">₹0</div>
+                            <p class="kpi-change"><i class="fas fa-arrow-up"></i> 12.5% from last week</p>
+                        </div>
+                        <div class="kpi-card">
+                            <p class="kpi-title">EFFICIENCY SCORE</p>
+                            <div class="animated-counter" id="efficiency-counter">0%</div>
+                            <p class="kpi-change"><i class="fas fa-arrow-up"></i> 8.3% from last week</p>
+                        </div>
+                        <div class="kpi-card">
+                            <p class="kpi-title">ON-TIME DELIVERIES</p>
+                            <div class="animated-counter" id="ontime-counter">0</div>
+                            <p class="kpi-change"><i class="fas fa-arrow-up"></i> 5.7% from last week</p>
+                        </div>
+                        <div class="kpi-card">
+                            <p class="kpi-title">FUEL COST</p>
+                            <div class="animated-counter" id="fuel-counter">₹0</div>
+                            <p class="kpi-change"><i class="fas fa-arrow-down"></i> 3.2% from last week</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Delivery Performance</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Fuel Cost Analysis</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="fuelChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Run Simulation</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="drivers">Available Drivers</label>
+                        <input type="number" id="drivers" value="5" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="start-time">Start Time</label>
+                        <input type="time" id="start-time" value="08:00">
+                    </div>
+                    <div class="form-group">
+                        <label for="max-hours">Max Hours Per Day</label>
+                        <input type="number" id="max-hours" value="8" min="1" max="24">
+                    </div>
+                    <div class="simulation-controls">
+                        <button class="btn btn-primary" id="run-simulation">
+                            <i class="fas fa-play-circle"></i> Run Simulation
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-history"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Active Drivers</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="driver-card">
+                        <div class="driver-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="driver-info">
+                            <h4>Rajesh Kumar</h4>
+                            <p><span class="status-indicator status-active"></span> Available • 6.5h shift</p>
+                        </div>
+                    </div>
+                    <div class="driver-card">
+                        <div class="driver-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="driver-info">
+                            <h4>Michael Johnson</h4>
+                            <p><span class="status-indicator status-active"></span> On delivery • 5.2h shift</p>
+                        </div>
+                    </div>
+                    <div class="driver-card">
+                        <div class="driver-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="driver-info">
+                            <h4>Sarah Williams</h4>
+                            <p><span class="status-indicator status-inactive"></span> Off duty • 8h completed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Orders</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                    </div>
+                    <div class="order-card">
+                        <div class="order-info">
+                            <h4>Order #10245</h4>
+                            <p>Electronic Goods • Route 12B</p>
+                        </div>
+                        <div class="order-value">₹12,450</div>
+                    </div>
+                    <div class="order-card">
+                        <div class="order-info">
+                            <h4>Order #10246</h4>
+                            <p>Medical Supplies • Route 8C</p>
+                        </div>
+                        <div class="order-value">₹8,900</div>
+                    </div>
+                    <div class="order-card">
+                        <div class="order-info">
+                            <h4>Order #10247</h4>
+                            <p>Food Products • Route 5A</p>
+                        </div>
+                        <div class="order-value">₹5,200</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-btn">
+        <i class="fas fa-bolt"></i>
+    </div>
+
+    <script>
+        // Animated counters
+        function animateCounter(element, target, prefix = '', suffix = '') {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = prefix + Math.round(current).toLocaleString() + suffix;
+            }, 30);
+        }
+
+        // Initialize charts
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['On Time', 'Late', 'Early'],
+                datasets: [{
+                    data: [72, 15, 13],
+                    backgroundColor: ['#2ecc71', '#e74c3c', '#3498db'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const fuelCtx = document.getElementById('fuelChart').getContext('2d');
+        const fuelChart = new Chart(fuelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Low Traffic', 'Medium Traffic', 'High Traffic'],
+                datasets: [{
+                    label: 'Fuel Cost (₹)',
+                    data: [12500, 18700, 24300],
+                    backgroundColor: ['#2ecc71', '#3498db', '#e74c3c'],
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Run simulation button handler
+        document.getElementById('run-simulation').addEventListener('click', function() {
+            // Simulate loading
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            this.disabled = true;
+
+            // Simulate API call delay
+            setTimeout(() => {
+                // Update counters with animation
+                animateCounter(document.getElementById('profit-counter'), 52450, '₹');
+                animateCounter(document.getElementById('efficiency-counter'), 92, '', '%');
+                animateCounter(document.getElementById('ontime-counter'), 68, '');
+                animateCounter(document.getElementById('fuel-counter'), 18500, '₹');
+
+                // Update charts with new data
+                performanceChart.data.datasets[0].data = [68, 10, 22];
+                performanceChart.update();
+
+                fuelChart.data.datasets[0].data = [14200, 19500, 22300];
+                fuelChart.update();
+
+                // Reset button
+                this.innerHTML = '<i class="fas fa-play-circle"></i> Run Simulation';
+                this.disabled = false;
+
+                // Show success notification
+                alert('Simulation completed successfully! New KPIs have been calculated.');
+            }, 2000);
+        });
+
+        // Initialize counters on page load
+        window.addEventListener('load', function() {
+            animateCounter(document.getElementById('profit-counter'), 48750, '₹');
+            animateCounter(document.getElementById('efficiency-counter'), 85, '', '%');
+            animateCounter(document.getElementById('ontime-counter'), 72, '');
+            animateCounter(document.getElementById('fuel-counter'), 15500, '₹');
+        });
+
+        // Floating button animation
+        const floatingBtn = document.querySelector('.floating-btn');
+        floatingBtn.addEventListener('click', function() {
+            alert('Quick simulation started with default parameters!');
+
+            // Trigger a simulation with default values
+            document.getElementById('run-simulation').click();
+        });
+    </script>
+</body>
+
+</html>
